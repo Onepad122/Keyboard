@@ -1,1 +1,599 @@
-# Keyboard
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diacritic Keyboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 100%;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: #4a6bdf;
+            color: white;
+            padding: 18px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 500;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .setup-screen {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .setup-screen h2 {
+            margin-bottom: 16px;
+            color: #4a6bdf;
+            font-size: 1.5rem;
+        }
+        
+        .setup-screen p {
+            margin-bottom: 20px;
+            color: #495057;
+            font-size: 1rem;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .step-number {
+            background-color: #4a6bdf;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+        
+        .step-content {
+            flex-grow: 1;
+        }
+        
+        .step-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #212529;
+        }
+        
+        .step-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            background-color: #4a6bdf;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #3a5bd9;
+        }
+        
+        .btn:active {
+            background-color: #2a4bc9;
+        }
+        
+        .keyboard-container {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .text-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .text-input {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: none;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+        }
+        
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 10px;
+            touch-action: manipulation;
+        }
+        
+        .key {
+            background-color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            font-size: 1.1rem;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.1s;
+        }
+        
+        .key:active {
+            background-color: #e9ecef;
+            transform: translateY(1px);
+        }
+        
+        .key-popup {
+            position: absolute;
+            bottom: calc(100% + 5px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 8px;
+            display: none;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: auto;
+            max-width: 240px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+        }
+        
+        .diacritic-key {
+            padding: 8px 10px;
+            margin: 3px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        
+        .diacritic-key:active {
+            background-color: #e9ecef;
+        }
+        
+        .space-key {
+            grid-column: span 4;
+        }
+        
+        .backspace-key {
+            grid-column: span 2;
+            font-size: 1rem;
+        }
+        
+        .shift-key, .return-key {
+            grid-column: span 2;
+            font-size: 0.9rem;
+        }
+        
+        .active-popup {
+            display: flex;
+        }
+        
+        .instructions {
+            margin-top: 16px;
+            padding: 12px;
+            background-color: #f1f3f5;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #495057;
+            text-align: center;
+        }
+        
+        .emoji {
+            font-size: 1.2rem;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        
+        @media (max-width: 480px) {
+            .key {
+                padding: 10px 0;
+                font-size: 1rem;
+            }
+            
+            .diacritic-key {
+                padding: 6px 8px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Diacritic Keyboard
+        </div>
+        <div class="content">
+            <div class="setup-screen" id="setupScreen">
+                <h2>Enable Diacritic Keyboard</h2>
+                <p>Follow these steps to add the keyboard to your device:</p>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Go to Settings</div>
+                        <div class="step-description">Open your device's Settings app</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Find Keyboard Settings</div>
+                        <div class="step-description">Navigate to System > Languages & input > Virtual keyboard</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Enable Diacritic Keyboard</div>
+                        <div class="step-description">Find "Diacritic Keyboard" in the list and enable it</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-title">Set as Default</div>
+                        <div class="step-description">Go back and set it as your default input method</div>
+                    </div>
+                </div>
+                
+                <button class="btn" id="setupBtn">
+                    <span class="emoji">⚙️</span> Open Keyboard Settings
+                </button>
+                
+                <div class="instructions">
+                    After enabling, switch to this keyboard in any app by tapping the keyboard icon.
+                </div>
+            </div>
+            
+            <div class="keyboard-container" id="keyboardContainer">
+                <div class="text-input-container">
+                    <textarea class="text-input" id="textInput" placeholder="Start typing here..."></textarea>
+                </div>
+                <div class="keyboard" id="keyboard">
+                    <!-- Keys will be added by JavaScript -->
+                </div>
+                <div class="instructions">
+                    Long press on any letter to access diacritic variations
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const setupScreen = document.getElementById('setupScreen');
+            const setupBtn = document.getElementById('setupBtn');
+            const keyboardContainer = document.getElementById('keyboardContainer');
+            const textInput = document.getElementById('textInput');
+            const keyboard = document.getElementById('keyboard');
+            
+            // Diacritic mappings for each letter (including ḥ)
+            const diacriticMap = {
+                'a': ['á', 'à', 'â', 'ä', 'ã', 'å', 'ā', 'ă', 'ą', 'ǎ', 'ǟ', 'ǡ', 'ǻ', 'ȁ', 'ȃ', 'ȧ'],
+                'b': ['ḃ', 'ḅ', 'ḇ'],
+                'c': ['ć', 'ĉ', 'ċ', 'č', 'ç', 'ḉ'],
+                'd': ['ď', 'ḋ', 'ḍ', 'ḏ', 'ḑ', 'ḓ'],
+                'e': ['é', 'è', 'ê', 'ë', 'ẽ', 'ē', 'ĕ', 'ė', 'ę', 'ě', 'ȅ', 'ȇ', 'ȩ', 'ḕ', 'ḗ', 'ḙ', 'ḛ', 'ḝ'],
+                'f': ['ḟ'],
+                'g': ['ĝ', 'ğ', 'ġ', 'ģ', 'ǧ', 'ǵ', 'ḡ'],
+                'h': ['ĥ', 'ȟ', 'ḣ', 'ḥ', 'ḧ', 'ḩ', 'ḫ'],
+                'i': ['í', 'ì', 'î', 'ï', 'ĩ', 'ī', 'ĭ', 'į', 'ǐ', 'ȉ', 'ȋ', 'ḭ', 'ḯ'],
+                'j': ['ĵ', 'ǰ'],
+                'k': ['ķ', 'ǩ', 'ḱ', 'ḳ', 'ḵ'],
+                'l': ['ĺ', 'ļ', 'ľ', 'ŀ', 'ł', 'ḷ', 'ḹ', 'ḻ', 'ḽ'],
+                'm': ['ḿ'],
+                'n': ['ń', 'ņ', 'ň', 'ŉ', 'ŋ', 'ǹ', 'ṅ', 'ṇ', 'ṉ', 'ṋ'],
+                'o': ['ó', 'ò', 'ô', 'ö', 'õ', 'ō', 'ŏ', 'ő', 'ơ', 'ǒ', 'ǫ', 'ǭ', 'ǿ', 'ȍ', 'ȏ', 'ȫ', 'ȭ', 'ȯ', 'ȱ', 'ṍ', 'ṏ', 'ṑ', 'ṓ'],
+                'p': ['ṕ', 'ṗ'],
+                'q': ['ʠ'],
+                'r': ['ŕ', 'ŗ', 'ř', 'ȑ', 'ȓ', 'ṙ', 'ṛ', 'ṝ', 'ṟ'],
+                's': ['ś', 'ŝ', 'ş', 'š', 'ș', 'ṡ', 'ṣ', 'ṥ', 'ṧ', 'ṩ'],
+                't': ['ţ', 'ť', 'ŧ', 'ț', 'ṫ', 'ṭ', 'ṯ', 'ṱ'],
+                'u': ['ú', 'ù', 'û', 'ü', 'ũ', 'ū', 'ŭ', 'ů', 'ű', 'ų', 'ư', 'ǔ', 'ǖ', 'ǘ', 'ǚ', 'ǜ', 'ȕ', 'ȗ', 'ṳ', 'ṵ', 'ṷ', 'ṹ', 'ṻ'],
+                'v': ['ṽ', 'ṿ'],
+                'w': ['ŵ', 'ẁ', 'ẃ', 'ẅ', 'ẇ', 'ẉ', 'ẘ'],
+                'x': ['ẋ', 'ẍ'],
+                'y': ['ý', 'ÿ', 'ŷ', 'ẏ', 'ȳ', 'ẙ', 'ỳ', 'ỵ', 'ỷ', 'ỹ'],
+                'z': ['ź', 'ż', 'ž', 'ẑ', 'ẓ', 'ẕ'],
+                // Special case for h with dot below (ḥ)
+                'h': ['ĥ', 'ȟ', 'ḣ', 'ḥ', 'ḧ', 'ḩ', 'ḫ']
+            };
+            
+            // Standard keyboard layout
+            const keyboardLayout = [
+                ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+                ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+                ['⇧', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '⌫'],
+                ['123', 'space', '⏎']
+            ];
+            
+            let isShift = false;
+            let isShowingPopup = false;
+            
+            // Show setup screen first
+            setupScreen.style.display = 'block';
+            keyboardContainer.style.display = 'none';
+            
+            // Setup button click handler
+            setupBtn.addEventListener('click', function() {
+                // In a real app, this would open device keyboard settings
+                // For this demo, we'll just show the keyboard
+                setupScreen.style.display = 'none';
+                keyboardContainer.style.display = 'flex';
+                initializeKeyboard();
+                textInput.focus();
+                
+                // Show a toast message about how to enable in real settings
+                setTimeout(() => {
+                    alert("In a real app, this button would open your device's keyboard settings. For this demo, you can use the keyboard directly.");
+                }, 500);
+            });
+            
+            // Initialize the keyboard
+            function initializeKeyboard() {
+                keyboard.innerHTML = '';
+                
+                keyboardLayout.forEach(row => {
+                    row.forEach(key => {
+                        const keyElement = document.createElement('div');
+                        keyElement.className = 'key';
+                        
+                        if (key === 'space') {
+                            keyElement.className += ' space-key';
+                            keyElement.textContent = ' ';
+                            keyElement.addEventListener('click', () => {
+                                insertText(' ');
+                            });
+                        } 
+                        else if (key === '⌫') {
+                            keyElement.className += ' backspace-key';
+                            keyElement.textContent = '⌫';
+                            keyElement.addEventListener('click', backspace);
+                        } 
+                        else if (key === '⇧') {
+                            keyElement.className += ' shift-key';
+                            keyElement.textContent = '⇧';
+                            keyElement.addEventListener('click', toggleShift);
+                        } 
+                        else if (key === '⏎') {
+                            keyElement.className += ' return-key';
+                            keyElement.textContent = '⏎';
+                            keyElement.addEventListener('click', () => {
+                                insertText('\n');
+                            });
+                        } 
+                        else if (key === '123') {
+                            keyElement.textContent = '123';
+                            keyElement.addEventListener('click', () => {
+                                alert('Number/symbol keyboard would appear here in a full implementation');
+                            });
+                        } 
+                        else {
+                            // Letter key
+                            const displayKey = isShift ? key.toUpperCase() : key.toLowerCase();
+                            keyElement.textContent = displayKey;
+                            
+                            // Add click handler for regular typing
+                            keyElement.addEventListener('click', () => {
+                                if (!isShowingPopup) {
+                                    insertText(displayKey);
+                                }
+                            });
+                            
+                            // Add long press for diacritics if the letter has them
+                            if (diacriticMap[key.toLowerCase()]) {
+                                let longPressTimer;
+                                
+                                keyElement.addEventListener('mousedown', (e) => {
+                                    e.preventDefault();
+                                    longPressTimer = setTimeout(() => {
+                                        isShowingPopup = true;
+                                        showDiacriticPopup(key.toLowerCase(), keyElement);
+                                    }, 500);
+                                });
+                                
+                                keyElement.addEventListener('mouseup', () => {
+                                    clearTimeout(longPressTimer);
+                                    setTimeout(() => { isShowingPopup = false; }, 100);
+                                });
+                                
+                                keyElement.addEventListener('mouseleave', () => {
+                                    clearTimeout(longPressTimer);
+                                });
+                                
+                                // For touch devices
+                                keyElement.addEventListener('touchstart', (e) => {
+                                    e.preventDefault();
+                                    longPressTimer = setTimeout(() => {
+                                        isShowingPopup = true;
+                                        showDiacriticPopup(key.toLowerCase(), keyElement);
+                                    }, 500);
+                                });
+                                
+                                keyElement.addEventListener('touchend', () => {
+                                    clearTimeout(longPressTimer);
+                                    setTimeout(() => { isShowingPopup = false; }, 100);
+                                });
+                            }
+                        }
+                        
+                        keyboard.appendChild(keyElement);
+                    });
+                });
+            }
+            
+            // Show diacritic popup for a key
+            function showDiacriticPopup(baseKey, keyElement) {
+                // Remove any existing popups
+                document.querySelectorAll('.key-popup').forEach(popup => {
+                    popup.remove();
+                });
+                
+                const popup = document.createElement('div');
+                popup.className = 'key-popup active-popup';
+                
+                // Add the base key first
+                const baseKeyElement = document.createElement('div');
+                baseKeyElement.className = 'diacritic-key';
+                baseKeyElement.textContent = isShift ? baseKey.toUpperCase() : baseKey;
+                baseKeyElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    insertText(isShift ? baseKey.toUpperCase() : baseKey);
+                    popup.remove();
+                });
+                popup.appendChild(baseKeyElement);
+                
+                // Add all diacritic variations
+                diacriticMap[baseKey].forEach(diacritic => {
+                    const diacriticElement = document.createElement('div');
+                    diacriticElement.className = 'diacritic-key';
+                    diacriticElement.textContent = isShift ? diacritic.toUpperCase() : diacritic;
+                    diacriticElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        insertText(isShift ? diacritic.toUpperCase() : diacritic);
+                        popup.remove();
+                    });
+                    popup.appendChild(diacriticElement);
+                });
+                
+                keyElement.appendChild(popup);
+                
+                // Position the popup to stay on screen
+                const popupRect = popup.getBoundingClientRect();
+                if (popupRect.left < 10) {
+                    popup.style.left = '10px';
+                    popup.style.transform = 'translateX(0)';
+                }
+                if (popupRect.right > window.innerWidth - 10) {
+                    popup.style.left = 'auto';
+                    popup.style.right = '10px';
+                    popup.style.transform = 'translateX(0)';
+                }
+                
+                // Close popup when clicking outside
+                setTimeout(() => {
+                    const closeHandler = function(e) {
+                        if (!popup.contains(e.target) && e.target !== keyElement) {
+                            popup.remove();
+                            document.removeEventListener('click', closeHandler);
+                            document.removeEventListener('touchstart', closeHandler);
+                        }
+                    };
+                    
+                    document.addEventListener('click', closeHandler);
+                    document.addEventListener('touchstart', closeHandler);
+                }, 0);
+            }
+            
+            // Insert text at cursor position
+            function insertText(text) {
+                const startPos = textInput.selectionStart;
+                const endPos = textInput.selectionEnd;
+                const currentText = textInput.value;
+                
+                textInput.value = currentText.substring(0, startPos) + text + currentText.substring(endPos);
+                
+                // Move cursor to after inserted text
+                const newPos = startPos + text.length;
+                textInput.setSelectionRange(newPos, newPos);
+                textInput.focus();
+            }
+            
+            // Backspace function
+            function backspace() {
+                const startPos = textInput.selectionStart;
+                const endPos = textInput.selectionEnd;
+                const currentText = textInput.value;
+                
+                if (startPos === endPos && startPos > 0) {
+                    // Delete one character
+                    textInput.value = currentText.substring(0, startPos - 1) + currentText.substring(endPos);
+                    textInput.setSelectionRange(startPos - 1, startPos - 1);
+                } else if (startPos !== endPos) {
+                    // Delete selection
+                    textInput.value = currentText.substring(0, startPos) + currentText.substring(endPos);
+                    textInput.setSelectionRange(startPos, startPos);
+                }
+                
+                textInput.focus();
+            }
+            
+            // Toggle shift
+            function toggleShift() {
+                isShift = !isShift;
+                initializeKeyboard();
+            }
+            
+            // Focus the text area when clicking on the keyboard container
+            keyboardContainer.addEventListener('click', () => {
+                textInput.focus();
+            });
+            
+            // Prevent keyboard from closing on mobile when typing
+            textInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    textInput.focus();
+                }, 0);
+            });
+        });
+    </script>
+</body>
+</html>
